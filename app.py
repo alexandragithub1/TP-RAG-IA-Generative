@@ -1,31 +1,60 @@
 
 """
-TP RAG - Question 20
-Interface Streamlit avec affichage des passages récupérés.
+TP RAG — Question 25
+Gestion des secrets Streamlit et interface chatbot RAG.
 """
 
+import os
 import streamlit as st
+
+# --- Question 25 : gestion des secrets ---
+
+# Les secrets Streamlit doivent être récupérés AVANT
+# l'importation de main.py.
+# En local, le fichier .env reste utilisé.
+
+try:
+    for nom in (
+        "OPENAI_API_KEY",
+        "MISTRAL_API_KEY",
+        "LLM_PROVIDER",
+        "CHAT_MODEL",
+        "EMBEDDING_MODEL",
+    ):
+        if nom in st.secrets and st.secrets[nom]:
+            os.environ[nom] = str(st.secrets[nom])
+
+except FileNotFoundError:
+    # Aucun fichier secrets.toml en local :
+    # main.py utilisera le fichier .env.
+    pass
+
+
+# Importer main.py après la configuration
 from main import get_retriever, rag_answer
+
 
 # --- Configuration de l'interface ---
 
 st.set_page_config(
-    page_title="Chatbot RAG - IA générative",
+    page_title="Chatbot RAG — IA générative",
     page_icon="💬",
     layout="centered",
 )
 
-st.title("Chatbot RAG - IA générative")
+st.title("Chatbot RAG — IA générative")
 
 st.caption(
-    "Posez vos questions sur l'intelligence artificielle générative."
+    "Posez vos questions sur l'intelligence "
+    "artificielle générative."
 )
 
 
-# --- Charger le retriever une seule fois ---
+# --- Chargement du retriever ---
 
 @st.cache_resource
 def charger_retriever():
+    """Charger le retriever une seule fois."""
     return get_retriever()
 
 
@@ -33,7 +62,7 @@ with st.spinner("Connexion à la base documentaire..."):
     retriever = charger_retriever()
 
 
-# --- Historique des conversations ---
+# --- Historique de conversation ---
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -42,7 +71,7 @@ if "messages" not in st.session_state:
 # --- Affichage des sources ---
 
 def afficher_sources(sources):
-    """Affiche les sources Wikipédia sans doublons."""
+    """Afficher les sources Wikipédia."""
 
     if not sources:
         return
@@ -56,7 +85,7 @@ def afficher_sources(sources):
 
 
 def preparer_sources(docs):
-    """Récupère les sources uniques des documents."""
+    """Récupérer les sources sans doublons."""
 
     sources = []
     urls_vues = set()
@@ -77,10 +106,10 @@ def preparer_sources(docs):
     return sources
 
 
-# --- Question 20 : récupérer les passages ---
+# --- Affichage des passages récupérés ---
 
 def preparer_passages(docs):
-    """Conserve les textes et métadonnées des chunks."""
+    """Conserver les chunks et leurs métadonnées."""
 
     return [
         {
@@ -95,7 +124,7 @@ def preparer_passages(docs):
 
 
 def afficher_passages(passages):
-    """Affiche les chunks dans une zone repliable."""
+    """Afficher les chunks dans une zone repliable."""
 
     if not passages:
         return
@@ -122,7 +151,7 @@ def afficher_passages(passages):
                 st.divider()
 
 
-# --- Réafficher l'historique ---
+# --- Réafficher les anciens messages ---
 
 for message in st.session_state.messages:
 
@@ -148,11 +177,11 @@ question = st.chat_input(
 )
 
 
-# --- Génération des nouvelles réponses ---
+# --- Génération des réponses ---
 
 if question:
 
-    # Enregistrer la question
+    # Enregistrer la question utilisateur
     st.session_state.messages.append({
         "role": "user",
         "content": question,
@@ -161,7 +190,6 @@ if question:
     with st.chat_message("user"):
         st.markdown(question)
 
-    # Afficher la réponse de l'IA
     with st.chat_message("assistant"):
 
         with st.spinner(
@@ -183,7 +211,6 @@ if question:
 
             else:
 
-                # Préparer les sources et passages
                 sources = preparer_sources(docs)
                 passages = preparer_passages(docs)
 
@@ -193,10 +220,10 @@ if question:
                 # Afficher les sources
                 afficher_sources(sources)
 
-                # Afficher les chunks dans un expander
+                # Afficher les passages
                 afficher_passages(passages)
 
-                # Enregistrer toute la réponse
+                # Conserver l'historique
                 st.session_state.messages.append({
                     "role": "assistant",
                     "content": reponse,
