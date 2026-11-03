@@ -1,0 +1,19 @@
+# Fichiers confidentiels
+.env
+.env.*
+!.env.template
+.streamlit/secrets.toml
+
+# Base vectorielle
+chroma_db_*/
+
+# Environnement Python
+.venv/
+
+# Fichiers temporaires Python
+__pycache__/
+*.py[cod]
+
+# Fichiers système
+.DS_Store
+Thumbs.db
