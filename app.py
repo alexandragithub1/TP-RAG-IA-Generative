@@ -44,10 +44,7 @@ st.set_page_config(
 
 st.title("Chatbot RAG — IA générative")
 
-st.caption(
-    "Posez vos questions sur l'intelligence "
-    "artificielle générative."
-)
+st.caption("Explorez l’intelligence artificielle générative avec notre chatbot RAG !")
 
 
 # --- Chargement du retriever ---
